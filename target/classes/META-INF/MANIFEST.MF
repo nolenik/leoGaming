@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Built-By: Юра
+Build-Jdk: 1.8.0_171
+Class-Path: libs/httpclient-4.5.3.jar libs/httpcore-4.4.6.jar libs/com
+ mons-logging-1.2.jar libs/commons-codec-1.9.jar libs/commons-httpclie
+ nt-3.1.jar libs/bcprov-jdk16-1.45.jar
+Main-Class: Post
+Created-By: Maven Integration for Eclipse
+
