@@ -23,7 +23,7 @@ public class Post {
 		if(args.length!=2)
 		{
 			System.out.println("Incorrect number of arguments");
-			System.exit(1);
+			System.exit(0);
 		}
 		Security.addProvider(new BouncyCastleProvider());
 		String strURL = "https://test.lgaming.net/external/extended";
