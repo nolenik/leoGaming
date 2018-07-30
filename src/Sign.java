@@ -1,5 +1,4 @@
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -11,8 +10,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -50,14 +47,14 @@ public class Sign {
 	    br.close();
 	    return strKeyPEM;
 	}
-	public static RSAPrivateKey getPrivateKey(String filename) throws IOException, GeneralSecurityException {
+	public static PrivateKey getPrivateKey(String filename) throws IOException, GeneralSecurityException {
 	    String privateKeyPEM = getKey(filename);
 	    privateKeyPEM = privateKeyPEM.replace("-----BEGIN RSA PRIVATE KEY-----\n", "");
 	    privateKeyPEM = privateKeyPEM.replace("-----END RSA PRIVATE KEY-----", "");
 	    byte[] encoded = Base64.decode(privateKeyPEM);
 	    KeyFactory kf = KeyFactory.getInstance("RSA");
 	    PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
-	    RSAPrivateKey privKey = (RSAPrivateKey) kf.generatePrivate(keySpec);
+	    PrivateKey privKey = (PrivateKey) kf.generatePrivate(keySpec);
 	    return privKey;
 	}
 
@@ -70,20 +67,5 @@ public class Sign {
 	    KeyFactory kf = KeyFactory.getInstance("RSA");
 	    PublicKey pubKey = (PublicKey) kf.generatePublic(new X509EncodedKeySpec(encoded));
 	    return pubKey;
-	}
-	public static PrivateKey generatePrivateKey(String filename) throws InvalidKeySpecException, FileNotFoundException, IOException, NoSuchAlgorithmException {
-		KeyFactory factory = KeyFactory.getInstance("RSA");
-		PemFile pemFile = new PemFile(filename);
-		byte[] content = pemFile.getPemObject().getContent();
-		PKCS8EncodedKeySpec privKeySpec = new PKCS8EncodedKeySpec(content);
-		return factory.generatePrivate(privKeySpec);
-	}
-	
-	public static PublicKey generatePublicKey(String filename) throws InvalidKeySpecException, FileNotFoundException, IOException, NoSuchAlgorithmException {
-		KeyFactory factory = KeyFactory.getInstance("RSA");
-		PemFile pemFile = new PemFile(filename);
-		byte[] content = pemFile.getPemObject().getContent();
-		X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(content);
-		return factory.generatePublic(pubKeySpec);
 	}
 }

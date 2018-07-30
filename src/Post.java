@@ -1,14 +1,12 @@
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
+import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.StringWriter;
-
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.interfaces.RSAPrivateKey;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
@@ -17,8 +15,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 public class Post {
-	static RSAPrivateKey privateKey1;
-	static PrivateKey privateKey2;
+	static PrivateKey privateKey;
 	static PublicKey publicKey;
 
 	public static String convertXMLFileToString(String fileName) {
@@ -49,28 +46,21 @@ public class Post {
 		         new org.bouncycastle.jce.provider.BouncyCastleProvider()
 		);
 		String strURL = "https://test.lgaming.net/external/extended";
-		String strXMLFilename = args[0]+"\\res\\"+args[1];
 		String st = convertXMLFileToString(args[0]+"\\res\\"+args[1]);
-		st = st.replaceAll("\\<\\?xml(.+?)\\?\\>", "").trim();
 		
-		//Shows that signature with PrivateKey and signature with RSAPrivate are the same
-		privateKey1 = Sign.getPrivateKey(".\\res\\private.pem");
-		privateKey2 = Sign.generatePrivateKey(".\\res\\private.pem");
+		
+		privateKey = Sign.getPrivateKey(".\\res\\private.pem");
 		publicKey = Sign.getPublicKey(args[0]+"\\res\\public.pem");
-		String sign1 = Sign.sign(privateKey1, st);
-		String sign2 = Sign.sign(privateKey2, st);
-		System.out.println(sign1+"\n"+sign2+"\n\n\n");
+		String sign = Sign.sign(privateKey, st);
 			
 		
 		
-		File input = new File(strXMLFilename);
 		PostMethod post = new PostMethod(strURL);
-		post.setRequestEntity(new InputStreamRequestEntity(new FileInputStream(
-				input), input.length()));
+		post.setRequestEntity(new ByteArrayRequestEntity(st.getBytes()));
 		
 		
 		
-		post.setRequestHeader("PayLogic-Signature", sign1);
+		post.setRequestHeader("PayLogic-Signature", sign);
 		post.setRequestHeader("Content-type", "text/xml; charset=UTF-8");
 		HttpClient httpclient = new HttpClient();
 		try {
@@ -78,8 +68,10 @@ public class Post {
 			System.out.println("Request body: \n"+st+"\n\n\n\n");
 			int result = httpclient.executeMethod(post);
 			System.out.println("Response status code: \n" + result+"\n");
-			try {
-				System.out.println("Response from this server:" + Sign.verify(publicKey,post.getResponseBodyAsString(), post.getRequestHeader("PayLogic-Header").getValue())+"\n");
+			try
+			{
+				
+				System.out.println("Response from this server:" + Sign.verify(publicKey,post.getResponseBodyAsString(), post.getResponseHeader("PayLogic-Signature").getValue())+"\n");
 			} catch (NullPointerException e) {
 				System.out.println("Response haven't PayLogic-Signature header\n");
 			}
